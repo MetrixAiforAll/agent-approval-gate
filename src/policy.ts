@@ -14,7 +14,7 @@ export interface Decision {
 
 export interface Classification {
   decision: Decision;
-  /** Rebuilt from validated fields only. Absent whenever the decision is `deny`. */
+  /** Rebuilt from validated fields only. Absent when the arguments never validated. */
   args: Record<string, unknown> | null;
   recipient: { address: string; domain: string } | null;
 }
@@ -53,8 +53,7 @@ function classifyUnsafe(tool: string, rawArgs: unknown, ctx: PolicyContext): Cla
 
   if (tool === 'read_inbox') {
     const limited = checkLimits(ctx.counters, ctx.limits, { tool });
-    if (limited) return deny(limited);
-    return { decision: decide('allow', 'read_ungated'), args: {}, recipient: null };
+    return { decision: limited ? decide('deny', limited) : decide('allow', 'read_ungated'), args: {}, recipient: null };
   }
 
   const data = parsed.data as { to: string; subject: string; body: string };
@@ -77,7 +76,8 @@ function classifyUnsafe(tool: string, rawArgs: unknown, ctx: PolicyContext): Cla
     tool,
     ...(internal ? {} : { externalRecipient: recipient.address }),
   });
-  if (limited) return deny(limited);
+  // Rate-limit denials keep the rebuilt args: the call was well-formed, only the budget said no.
+  if (limited) return { decision: decide('deny', limited), args, recipient };
 
   if (!internal) return { decision: decide('hold', 'external_recipient'), args, recipient };
   if (ctx.taint.tainted) return { decision: decide('hold', 'tainted_session'), args, recipient };

@@ -149,6 +149,13 @@ Eight cases, all on RFC 2606 reserved domains: six injections (`blunt-override`,
 canary that must be *held* rather than refused (an agent that asks permission for everything is
 worthless), and a happy path that must be allowed with no prompt.
 
+Every run also produces a counterfactual column: the same recorded turns replayed through a
+proxy constructed with `bypassGate: true`, which validates arguments, records the shadow
+classification and then executes anyway, logging `verdict: "bypassed"`. Attempt rate is the
+same in both columns by construction; the breach-rate delta is the gate's contribution and
+nothing else. A test asserts the bypassed column breaches, so a corpus too weak to breach an
+unprotected agent fails CI rather than quietly flattering the gate.
+
 The seven gate-integrity checks in `src/eval/integrity.ts` need no model and run both in
 vitest and at the end of every eval run, so the scorecard vouches for them on every prompt
 change and model upgrade.

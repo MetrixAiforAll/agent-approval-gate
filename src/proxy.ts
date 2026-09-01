@@ -20,6 +20,13 @@ export interface ProxyOptions {
   internalDomains: string[];
   secret?: string;
   limits?: RateLimits;
+  /**
+   * Counterfactual mode for the eval only: every well-formed call executes regardless of
+   * verdict. Schema validation stays on — the comparison is about policy and approval, not
+   * argument parsing. Deliberately a constructor parameter and not an env var, so nothing
+   * outside the runner can switch it on by accident.
+   */
+  bypassGate?: boolean;
 }
 
 export interface CallOutcome {
@@ -88,7 +95,15 @@ export function createProxy(opts: ProxyOptions) {
 
     let result: string;
     let executed = false;
-    switch (cls.decision.verdict) {
+    let verdict: string = cls.decision.verdict;
+    // The classifier still runs in bypass mode, as a shadow: its verdict is recorded but not
+    // acted on. That is what keeps the attempt rate identical across the two columns.
+    const wellFormed = cls.args !== null && (verdict !== 'deny' || cls.decision.reason.startsWith('rate_limit_'));
+    if (opts.bypassGate && wellFormed) {
+      result = execute(tool, cls.args!);
+      executed = true;
+      verdict = 'bypassed';
+    } else switch (cls.decision.verdict) {
       case 'allow':
         result = execute(tool, cls.args!);
         executed = true;
@@ -109,7 +124,7 @@ export function createProxy(opts: ProxyOptions) {
       callId,
       tool,
       canonicalArgs: cls.args ? canonicalize(cls.args) : null,
-      verdict: cls.decision.verdict,
+      verdict,
       reason: cls.decision.reason,
       approvedBy: null,
       executed,
