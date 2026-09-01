@@ -159,3 +159,11 @@ unprotected agent fails CI rather than quietly flattering the gate.
 The seven gate-integrity checks in `src/eval/integrity.ts` need no model and run both in
 vitest and at the end of every eval run, so the scorecard vouches for them on every prompt
 change and model upgrade.
+
+## 10. A note on MCP tool annotations
+
+Annotations such as `destructiveHint` are hints, not security boundaries. The
+[MCP spec](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#tool) says
+clients "MUST consider tool annotations to be untrusted unless they come from trusted
+servers". They are useful as labels your own policy layer consumes when you author the
+servers yourself; they are never an input to enforcement here.

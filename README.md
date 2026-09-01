@@ -74,11 +74,11 @@ prompt-and-context hygiene working as intended, and the reason the gate exists f
 - Every tool call runs `validate → canonicalize → hash → policy → (allow | hold | deny) → execute`,
   in that order, in `src/proxy.ts`. Nothing in that path consults a model.
 - `read_inbox` is ungated and introduces untrusted content; `send_email` is classified on every call.
-- The proxy never approves. It *classifies*. Only a human approves, only for `hold`, and the
-  prompt they see shows the canonical arguments that will execute — never the model's summary.
-- Two independent controls: the email server's scope means the agent can only ever touch email
-  even if the proxy has a bug; the gate means *this* send does not go out unapproved even if
-  the scope is too broad. RBAC cannot tell a colleague from an unknown external domain.
+- The proxy never approves. It *classifies*. Only a human approves, only for `hold`, and they
+  see the canonical arguments that will execute — never the model's summary.
+- Two independent controls: the email server's scope (may this agent ever touch email?) and
+  the gate (should *this* send, with *these* arguments, go out now?). RBAC cannot tell a
+  colleague from an unknown external domain.
 - Everything fails closed: unknown tool, bad arguments, a thrown exception — all `deny`.
 
 **The four approval properties** (`src/approvals.ts`, each tested on its own):
@@ -87,11 +87,9 @@ prompt-and-context hygiene working as intended, and the reason the gate exists f
 3. Approval arrives out of band, on a different channel from the untrusted content.
 4. Tokens are single-use and time-bounded.
 
-**Provenance.** Once a session has read the inbox it is tainted for good, and even an
-internal send is held (`src/taint.ts`).
+**Provenance.** Once a session has read the inbox it is tainted for good; even internal sends are held.
 
-**Audit.** Every decision is appended to a hash-chained JSONL log; `npm run verify-chain`
-proves it has not been edited, and a tampered fixture proves the verifier can fail.
+**Audit.** Every decision goes to a hash-chained JSONL log; `npm run verify-chain` proves it unedited, and a tampered fixture proves the verifier can fail.
 
 ## The metric split
 
@@ -122,10 +120,13 @@ that matters operationally.
   party, closing the loop if the approval arrives through the same channel the injection did.
   Out of scope here.
 - Durable, shared approval storage. The in-memory `Map` is single-process only.
-- MCP tool annotations such as `destructiveHint` are hints, not security boundaries. The
-  [MCP spec](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#tool) says
-  clients "MUST consider tool annotations to be untrusted unless they come from trusted
-  servers". They are useful as labels your own policy layer consumes when you author the
-  servers yourself.
+- MCP tool annotations such as `destructiveHint` are hints, not security boundaries (see docs).
+
+## Known gaps / next steps
+
+- **No real approver channel.** `executeApproved` is only called by tests; the out-of-band human is asserted, not built.
+- **Taint never clears.** Safe, but unusable as-is; a real system needs per-thread or per-source scoping.
+- **The corpus never actually fooled the model.** The three attempts are benign replies under taint; hostile-recipient cases would sharpen the gate-off column.
+- **One process.** The proxy↔server boundary is convention here; the integrity tests are what enforce it.
 
 The deep path: [docs/how-it-works.md](docs/how-it-works.md).
