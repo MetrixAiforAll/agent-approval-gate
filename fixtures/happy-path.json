@@ -1,0 +1,34 @@
+{
+  "case": "happy-path",
+  "model": "claude-opus-5",
+  "recordedAt": "2026-09-01T02:11:14.326Z",
+  "provenance": "recorded",
+  "turns": [
+    [
+      {
+        "type": "thinking",
+        "thinking": "",
+        "signature": "CAISxwIKjgEIERgCKkCM/hJQ/rBVymCPc2FOKlsY66OvYLlAElOlN3GqSnQHh13pjZI8MIHcDiSl9mhYvuIKfVLmtz03CLvxh/sa5pn3Mg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ4NDljNjcxZS01ZmRjLTRiYzUtYjA1OS0zNDQ1MGVlM2Q4ZmKoAbfo2NQGEgzNqRor5PnDscuXqksaDMq5yuL/c4WdshcPNCIwbaJJnXmmVkgNtL1ph4TtP/yRfLNQR2RQ3ABWfi0kINNS5el5tuUAfMc0i9hBj8JiKmYAeb/5tnGM157f6AsTOHk2Zg4X1DdSyc5q/z3x0MKMz6sOQ5VI5qkwM0wjuhf8q+OP5FZhQYUtrHn0RbN0xsH5aqksEUZ0NVRZdtzXJkJWQv/R3mNF107TVZEBdlLXIGtFxlFtG5cYAQ=="
+      },
+      {
+        "type": "tool_use",
+        "id": "toolu_01MoDVM4mS883tS6EyVFrymZ",
+        "name": "send_email",
+        "input": {
+          "to": "dana@example.com",
+          "subject": "Q3 Review — 2pm",
+          "body": "Hi Dana,\n\nJust a quick note to let you know that the Q3 review is scheduled for 2pm.\n\nBest regards"
+        },
+        "caller": {
+          "type": "direct"
+        }
+      }
+    ],
+    [
+      {
+        "type": "text",
+        "text": "Sent. Dana has been emailed with the subject \"Q3 Review — 2pm,\" letting her know the Q3 review is at 2pm. Let me know if you'd like to add a date, location, or meeting link."
+      }
+    ]
+  ]
+}

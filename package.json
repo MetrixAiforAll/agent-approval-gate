@@ -1,0 +1,29 @@
+{
+  "name": "agent-approval-gate",
+  "version": "0.1.0",
+  "description": "An LLM agent that cannot be prompt-injected into sending unapproved email, because the decision does not belong to the model.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "demo": "tsx src/eval/run.ts --replay",
+    "eval:live": "tsx src/eval/run.ts --live",
+    "record": "tsx src/eval/run.ts --record",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "verify-chain": "tsx src/audit.ts --verify"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.122.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.0"
+  }
+}
