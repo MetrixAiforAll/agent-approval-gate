@@ -3,6 +3,8 @@
 An LLM agent with the ability to send email that **cannot** be prompt-injected into sending
 unapproved email — because the decision does not belong to the model.
 
+A proof of concept demonstrating an architecture: not a library, not published, not production-hardened.
+
 [![ci](https://github.com/giladresisi/agent-approval-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/giladresisi/agent-approval-gate/actions/workflows/ci.yml)
 
 > **The model is not a security boundary.**
@@ -59,7 +61,8 @@ git clone https://github.com/giladresisi/agent-approval-gate && cd agent-approva
 ```
 
 The left column is the same agent, same model responses, same corpus, with enforcement
-bypassed.
+bypassed. In three of the six injection cases the model never attempted a gated send at all:
+prompt-and-context hygiene working as intended, and the reason the gate exists for the other three.
 
 `npm run demo` replays recorded model responses through the real gate with no API key;
 `npm run eval:live` re-runs the same cases against the real Anthropic API.
